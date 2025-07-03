@@ -8,7 +8,6 @@ from tqdm import tqdm
 import wandb
 
 # ====== Dataset ======
-# ====== Dataset ======
 class InfoNCEDataset(Dataset):
     def __init__(self, jsonl_path, tokenizer, style_id=0, max_length=256, num_negatives=4):
         self.data = [json.loads(l) for l in open(jsonl_path)]
@@ -17,14 +16,13 @@ class InfoNCEDataset(Dataset):
         self.num_negatives = num_negatives
         self.style_id = style_id
 
-        # 分别获取3个style的索引列表
+        # ⚠️ PLEASE UPDATE HERE IF YOU ADJUST THE DATASET
         self.groups = {
             0: list(range(0, 400)),
             1: list(range(400, 800)),
             2: list(range(800, 1200)),
         }
 
-        # 只保留某一组作为注入数据，其余用于采样负样本
         self.used_indices = self.groups[style_id]
         self.negative_pool = []
         for gid, idxs in self.groups.items():
@@ -38,7 +36,6 @@ class InfoNCEDataset(Dataset):
         idx = self.used_indices[i]
         item = self.data[idx]
 
-        # 随机采样负样本（从其他组中）
         neg_indices = random.sample(self.negative_pool, self.num_negatives)
 
         q_tok = self.tokenizer(item['query'], truncation=True, padding='max_length',
