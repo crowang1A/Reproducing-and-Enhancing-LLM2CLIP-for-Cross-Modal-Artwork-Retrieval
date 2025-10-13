@@ -18,9 +18,9 @@ class InfoNCEDataset(Dataset):
 
         # ⚠️ PLEASE UPDATE HERE IF YOU ADJUST THE DATASET
         self.groups = {
-            0: list(range(0, 400)),
-            1: list(range(400, 800)),
-            2: list(range(800, 1200)),
+            0: list(range(0, 800)),
+            1: list(range(800, 1600)),
+            2: list(range(1600, 2400)),
         }
 
         self.used_indices = self.groups[style_id]
