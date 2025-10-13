@@ -9,7 +9,6 @@ from llm2vec import LLM2Vec
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# 加载 LLM2CLIP 文本模型（用于 LLM2Vec）
 llm_model_name = 'microsoft/LLM2CLIP-Llama-3-8B-Instruct-CC-Finetuned'
 config = AutoConfig.from_pretrained(llm_model_name, trust_remote_code=True)
 llm_model = AutoModel.from_pretrained(
@@ -21,10 +20,8 @@ llm_model = AutoModel.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
 llm_model.config._name_or_path = 'meta-llama/Meta-Llama-3-8B-Instruct'
 
-# 初始化 LLM2Vec
 l2v = LLM2Vec(llm_model, tokenizer, pooling_mode="mean", max_length=512, doc_max_length=512)
 
-# 加载 LLM2CLIP 模型（用于 get_text_features）
 vision_model_path = "microsoft/LLM2CLIP-Openai-B-16"
 model = AutoModel.from_pretrained(vision_model_path, trust_remote_code=True, torch_dtype=torch.bfloat16).to(device).eval()
 
@@ -55,45 +52,8 @@ def encode_texts(texts: List[str], batch_size=64) -> torch.Tensor:
             proj_emb = torch.nn.functional.normalize(proj_emb, dim=-1)
         all_feats.append(proj_emb.cpu())
     all_feats = torch.cat(all_feats)
-    print(f"✅ [LLM2CLIP-B16] Text feature shape: {all_feats.shape}")
+    print(f" [LLM2CLIP-B16] Text feature shape: {all_feats.shape}")
     return all_feats
-
-# def encode_texts(texts: List[str], batch_size=64) -> torch.Tensor:
-#     all_feats = []
-#     for i in tqdm(range(0, len(texts), batch_size), desc="Encoding texts without projection"):
-#         batch = texts[i:i + batch_size]
-#         with torch.no_grad():
-#             raw_emb = l2v.encode(batch, convert_to_tensor=True).to(device)
-#             raw_emb = torch.nn.functional.normalize(raw_emb, dim=-1)  # 直接 normalize
-#         all_feats.append(raw_emb.cpu())
-#     all_feats = torch.cat(all_feats)
-#     print(f"✅ [LLM2CLIP-B16 no proj] Text feature shape: {all_feats.shape}")
-#     return all_feats
-
-# def encode_texts(texts: List[str], batch_size=64) -> torch.Tensor:
-#     all_feats = []
-
-#     # 获取 projection 层
-#     projection_layer = model.text_adapter.adaptor[5].to(torch.float32)  # Linear(4096 -> 1280)
-
-#     for i in tqdm(range(0, len(texts), batch_size), desc="Encoding texts with manual projection"):
-#         batch = texts[i:i + batch_size]
-#         with torch.no_grad():
-#             # Step 1: 原始 LLM2Vec 输出（4096 维）
-#             raw_emb = l2v.encode(batch, convert_to_tensor=True).to(device)  # [B, 4096]
-
-#             # Step 2: 乘以原始模型中的 projection 层（变成 1280 维）
-#             projected_emb = projection_layer(raw_emb)  # [B, 1280]
-
-#             # Step 3: normalize
-#             projected_emb = torch.nn.functional.normalize(projected_emb, dim=-1)
-
-#         all_feats.append(projected_emb.cpu())
-
-#     all_feats = torch.cat(all_feats)
-#     print(f"✅ [LLM2CLIP-B16 manual proj] Text feature shape: {all_feats.shape}")
-#     return all_feats
-
 
 def process(name, cfg):
     data = load_json(cfg["ann_path"])
