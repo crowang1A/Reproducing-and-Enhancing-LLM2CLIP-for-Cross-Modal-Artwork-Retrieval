@@ -93,7 +93,6 @@ class PairwiseLoraModel(nn.Module):
         return q, pos, neg, q_base
 
 
-# 🔹 Projection模块（包含LayerNorm + Linear）
 class ProjectionWithNorm(nn.Module):
     def __init__(self, norm, linear):
         super().__init__()
