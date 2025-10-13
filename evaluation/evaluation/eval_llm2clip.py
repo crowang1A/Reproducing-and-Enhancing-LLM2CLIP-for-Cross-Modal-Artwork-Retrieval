@@ -39,14 +39,7 @@ def encode_images(paths, batch_size=32):
     return torch.cat(all_embeds, dim=0)
 
 def compute_text_to_image_ranking(image_feats, text_feats, gt_indices):
-    # 保证dtype一致
-    print(f"🔍 text_feats shape: {text_feats.shape}")
-    print(f"🔍 image_feats shape: {image_feats.shape}")
     image_feats = image_feats.to(dtype=text_feats.dtype)
-
-    print(f"🔍 text_feats shape: {text_feats.shape}")
-    print(f"🔍 image_feats shape: {image_feats.shape}")
-
     sims = text_feats @ image_feats.T
     ranks = sims.argsort(dim=-1, descending=True)
 
