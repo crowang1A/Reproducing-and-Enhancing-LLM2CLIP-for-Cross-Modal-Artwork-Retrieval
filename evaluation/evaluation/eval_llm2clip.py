@@ -107,7 +107,6 @@ def main(args):
         for k, v in recalls.items():
             print(f"{k}: {v * 100:.2f}%")
 
-        # 保存
         save_path = os.path.join(args.save_dir, f"{args.prefix}_{name}.csv")
         records = []
         for idx, gt_idx, rank_pos in ranking_records:
